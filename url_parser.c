@@ -8,16 +8,24 @@
 #include <stdbool.h>
 #include "url_parser.h"
 
-void free_parsed_url(parsed_url_st *url_parsed)
+char *url_getHost(parsed_url_st *parsed_url)
 {
-    if (url_parsed->protocol)
-        free(url_parsed->protocol);
-    if (url_parsed->host)
-        free(url_parsed->host);
-    if (url_parsed->resource_path)
-        free(url_parsed->resource_path);
+    return parsed_url->host;
+}
 
-    free(url_parsed);
+unsigned short url_getPort(parsed_url_st *parsed_url)
+{
+    return parsed_url->port;
+}
+
+char *url_getProtocol(parsed_url_st *parsed_url)
+{
+    return parsed_url->protocol;
+}
+
+char *url_getPath(parsed_url_st *parsed_url)
+{
+    return parsed_url->resource_path;
 }
 
 static inline void parse_port(parsed_url_st *parsed_url, char **token_url_pointer)
@@ -97,6 +105,18 @@ static inline void parse_path(parsed_url_st *parsed_url, char **token_url_pointe
         parsed_url->resource_path = (char *)malloc(sizeof(char) * 2);
         strcpy(parsed_url->resource_path, "/");
     }
+}
+
+void free_parsed_url(parsed_url_st *url_parsed)
+{
+    if (url_parsed->protocol)
+        free(url_parsed->protocol);
+    if (url_parsed->host)
+        free(url_parsed->host);
+    if (url_parsed->resource_path)
+        free(url_parsed->resource_path);
+
+    free(url_parsed);
 }
 
 int parse_url(char *url, parsed_url_st *parsed_url)
