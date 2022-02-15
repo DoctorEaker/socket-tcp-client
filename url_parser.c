@@ -110,11 +110,7 @@ int parse_url(char *url, parsed_url_st *parsed_url)
 {
     char *_url = (char *)malloc(sizeof(char) * (strlen(url) + 1));
     char *_path = NULL;
-    char *token;
     char *token_url_pointer;
-    char *token_host;
-    char *token_host_pointer;
-    char *host_port;
 
     strcpy(_url, url);
 
