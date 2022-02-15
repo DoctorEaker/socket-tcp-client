@@ -6,14 +6,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
-
-typedef struct
-{
-    char *host;
-    unsigned short port;
-    char *resource_path;
-    char *protocol;
-} parsed_url_st;
+#include "url_parser.h"
 
 void free_parsed_url(parsed_url_st *url_parsed)
 {
