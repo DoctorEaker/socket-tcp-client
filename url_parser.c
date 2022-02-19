@@ -97,8 +97,9 @@ static inline void parse_path(parsed_url_st *parsed_url, char **token_url_pointe
     parsed_url->resource_path = NULL;
     if (token)
     {
-        parsed_url->resource_path = (char *)malloc(sizeof(char) * (strlen(token) + 1));
-        strncpy(parsed_url->resource_path, token, strlen(token));
+        parsed_url->resource_path = (char *)malloc(sizeof(char) * (strlen(token) + 2));
+        strcpy(parsed_url->resource_path, "/");
+        strcat(parsed_url->resource_path, token);
     }
     else
     {

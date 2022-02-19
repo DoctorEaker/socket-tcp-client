@@ -9,7 +9,8 @@
 #include <netdb.h>
 #include "yacurl.h"
 
-#define BUFFER_LIMIT 8192
+#define MAX_BUFFER_LIMIT 8192
+#define MAX_REQUEST_SIZE 1024
 
 parsed_url_st *yacurl_getParsedUrl(yacurl_st *yacurl)
 {
@@ -27,21 +28,62 @@ void initialize_sockaddr_in(yacurl_st *yacurl)
     yacurl->server_address = server_address;
 }
 
-void yacurl_connect(yacurl_st *yacurl)
+int yacurl_connect(yacurl_st *yacurl)
 {
     if (connect(yacurl->sockfd, (struct sockaddr *)&(yacurl->server_address), sizeof(struct sockaddr)) == -1)
     {
         perror("connect");
-        exit(1);
+        return -1;
     };
+    return 1;
+}
+
+char *yacurl_getRequest(yacurl_st *yacurl)
+{
+
+    char request_template[] = "GET %s HTTP/1.1\r\n"
+                              "Host: %s\r\n"
+                              "Connection: close \r\n\r\n";
+
+    char *request = malloc(MAX_REQUEST_SIZE);
+    char *host = yacurl->url_parsed->host;
+    char *path = yacurl->url_parsed->resource_path;
+
+    snprintf(request, MAX_REQUEST_SIZE, request_template, path, host);
+
+    return request;
+}
+
+void yacurl_send(yacurl_st *yacurl)
+{
+    if (send(yacurl->sockfd, yacurl_getRequest(yacurl), MAX_REQUEST_SIZE, 0) == -1)
+    {
+        perror("send");
+        exit(1);
+    }
+}
+
+char *yacurl_recv(yacurl_st *yacurl, char *response)
+{
+    char inputBuffer[MAX_BUFFER_LIMIT] = {0};
+    int readBytes = recv(yacurl->sockfd, inputBuffer, sizeof(inputBuffer) - 1, 0);
+    if (readBytes < 0)
+    {
+        perror("recv");
+        exit(1);
+    }
+    response = inputBuffer;
+    return response;
+}
+
+void yacurl_save(yacurl_st *yacurl)
+{
 }
 
 void yacurl_constructor(char *url, unsigned short port, yacurl_st *yacurl)
 {
     parsed_url_st *parsed_url;
     struct sockaddr_in server_address;
-
-    yacurl = (yacurl_st *)malloc(sizeof(yacurl_st));
 
     parsed_url = (parsed_url_st *)malloc(sizeof(parsed_url_st));
     parse_url(url, parsed_url);
@@ -64,11 +106,13 @@ void yacurl_constructor(char *url, unsigned short port, yacurl_st *yacurl)
         yacurl->server_port = port;
     }
 
-    if ((yacurl->host_info = gethostbyname(gethostbyname(yacurl->url_parsed->host))) == NULL)
+    if ((yacurl->host_info = gethostbyname(yacurl->url_parsed->host)) == NULL)
     {
         herror("gethostbyname");
         exit(1);
     }
 
     initialize_sockaddr_in(yacurl);
+
+    printf("> %s \n", yacurl->url_parsed->resource_path);
 }

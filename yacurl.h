@@ -15,5 +15,10 @@ typedef struct
 } yacurl_st;
 
 void yacurl_constructor(char *url, unsigned short port, yacurl_st *yacurl);
+char *yacurl_getRequest(yacurl_st *yacurl);
+parsed_url_st *yacurl_getParsedUrl(yacurl_st *yacurl);
+int yacurl_connect(yacurl_st *yacurl);
+void yacurl_send(yacurl_st *yacurl);
+char *yacurl_recv(yacurl_st *yacurl, char *response);
 
 #endif
